@@ -46,6 +46,9 @@ def case_1():
     df = pd.merge(df_buildings, df_rooms, how = 'left', left_on = 'id', right_on = 'building_id')
     df = pd.merge(df, df_agreement, how = 'left', on = 'building_id')
 
+    df['building_live_date'] = pd.to_datetime(df['building_live_date'])
+    df['soft_live_date'] = pd.to_datetime(df['soft_live_date'])
+
     # Filtering data by building_live_date <= today
     df = df[df['building_live_date'] <= str(today)]
 
@@ -56,8 +59,6 @@ def case_1():
     occupied_values = [1]
     df["occupied"] = np.select(occupied_conditions, occupied_values, default= 0)
     
-    df = df[df["occupied"] == 1]
-
     # calculate occupied rooms
     df_get_occupied_rooms = df.groupby(["building_id","occupied"], as_index=False)["room_id"].count()
     df_get_occupied_rooms = df_get_occupied_rooms.rename(columns = {"room_id" : "occupied_rooms"})
@@ -68,8 +69,11 @@ def case_1():
     df_get_total_rooms = df_get_total_rooms.rename(columns = {"room_id" : "total_rooms_by_building"})
     df = pd.merge(df, df_get_total_rooms, how = 'inner', on = ['building_id'])
     
+    
+    df = df[df["occupied"] == 1]
     # calculate occupancy
     df["occupancy"] = df["occupied_rooms"] / df["total_rooms_by_building"]
+    
     df = df[["property_code","rukita_option","occupancy","building_live_date"]]
     df = df.rename(columns = {'building_live_date' : 'date'})
     df = df.drop_duplicates()
