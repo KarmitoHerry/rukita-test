@@ -1,0 +1,4 @@
+Flask==2.2.3
+Scrapy==2.8.0
+pandas==2.0.0
+pandas-gbq==0.19.1
